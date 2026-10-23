@@ -1,0 +1,6 @@
+# Base URL of backNextoway REST API
+VITE_BACKEND_API_URL=http://localhost:3001
+# OCPP WebSocket gateway (central-system-ocpp); chargers connect to <url>/<evseId>
+VITE_OCPP_GATEWAY_URL=ws://localhost:8887
+# Optional sub-path for static hosting (e.g. GitHub Pages). Leave empty to serve at "/"
+# VITE_BASE_URL=
