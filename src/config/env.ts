@@ -7,12 +7,9 @@ const pick = (value: string | undefined, fallback: string) => {
 
 export function resolveEnv(raw: RawEnv) {
   return {
-    BACKEND_API_URL: pick(raw.VITE_BACKEND_API_URL, 'http://localhost:3001'),
-    // central-system-ocpp (Go) gateway; not Centrifugo (9000) nor the Nest API (3001).
-    OCPP_GATEWAY_URL: pick(raw.VITE_OCPP_GATEWAY_URL, 'ws://localhost:8887'),
+    // Optional CSMS URL pre-filled in the "New charge point" form; users can always type their own.
+    DEFAULT_CSMS_URL: pick(raw.VITE_DEFAULT_CSMS_URL, ''),
   }
 }
 
-export const { BACKEND_API_URL, OCPP_GATEWAY_URL } = resolveEnv(
-  import.meta.env as unknown as RawEnv
-)
+export const { DEFAULT_CSMS_URL } = resolveEnv(import.meta.env as unknown as RawEnv)

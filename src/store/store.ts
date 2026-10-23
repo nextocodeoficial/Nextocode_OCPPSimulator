@@ -40,28 +40,19 @@ export const { setTheme, toggleTheme, setSidebarOpen, toggleSidebar } = uiSlice.
 import ocppReducer from '../features/ocpp/ocppSlice'
 import { loadOcppState, saveOcppState } from '../features/ocpp/storage'
 
-import authReducer from '../features/backend/authSlice'
-import { loadAuthState, saveAuthState } from '../features/backend/authStorage'
-import { bindStoreToApi } from '../features/backend/session'
-
 const preloadedOcpp = loadOcppState()
-const preloadedAuth = loadAuthState()
 
 const rootReducer = combineReducers({
   ui: uiSlice.reducer,
   ocpp: ocppReducer,
-  backendAuth: authReducer,
 })
 
 export const store = configureStore({
   reducer: rootReducer,
   preloadedState: {
     ...(preloadedOcpp ? { ocpp: preloadedOcpp } : {}),
-    ...(preloadedAuth ? { backendAuth: preloadedAuth } : {}),
   } as Partial<ReturnType<typeof rootReducer>>,
 })
-
-bindStoreToApi(store)
 
 // Persist ocpp slice to localStorage (simple throttle)
 let persistTimer: number | undefined
@@ -72,8 +63,6 @@ store.subscribe(() => {
     const ocpp = state.ocpp
     saveOcppState({ items: ocpp.items, order: ocpp.order, selectedId: ocpp.selectedId })
   }, 250)
-  // Auth goes to sessionStorage immediately: a refreshed token must not be lost on reload.
-  saveAuthState(store.getState().backendAuth)
 })
 
 export type RootState = ReturnType<typeof store.getState>

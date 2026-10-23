@@ -2,8 +2,7 @@ import { normalizeDeviceSettings, normalizeOcppConfiguration } from '@/constants
 import type { ChargePointConfiguration, DeviceSettings, OcppConfiguration, Connector } from '@/types/ocpp'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice, nanoid } from '@reduxjs/toolkit'
-import { OCPP_GATEWAY_URL } from '@/config/env'
-import type { BackendChargePoint, OrgRef } from '@/features/backend/types'
+import { DEFAULT_CSMS_URL } from '@/config/env'
 
 export type Protocol = 'ocpp1.6' | 'ocpp2.0.1'
 
@@ -20,15 +19,6 @@ export interface ChargePointRuntime {
   activeConnectorId?: number; // for backward compatibility or current selection
 }
 
-export interface BackendOrigin {
-  organizationId: string
-  organizationName: string
-  zoneId: string
-  zoneName: string
-  chargePointId: string
-  evseId: string
-}
-
 export interface ChargePoint {
   id: string
   label: string
@@ -37,22 +27,12 @@ export interface ChargePoint {
   paused: boolean
   runtime: ChargePointRuntime
   chargePointConfig?: ChargePointConfiguration
-  /** Present only for chargers imported from backNextoway; absent means "Local". */
-  backend?: BackendOrigin
 }
 
 interface OcppState {
   items: Record<string, ChargePoint>
   order: string[]
   selectedId?: string
-}
-
-/** Maps a backNextoway ConnectorType to the simulator's socket options. */
-function toSocketType(type: string): string {
-  if (type.startsWith('CCS')) return 'CCS'
-  if (type === 'CHAdeMO') return 'CHAdeMO'
-  if (type.endsWith('Type_1')) return 'Type1'
-  return 'Type2'
 }
 
 const initialState: OcppState = {
@@ -104,7 +84,7 @@ const ocppSlice = createSlice({
             id,
             label: partial?.label || `CP ${id}`,
             config: partial?.config || {
-              csmsUrl: OCPP_GATEWAY_URL,
+              csmsUrl: DEFAULT_CSMS_URL,
               cpId: `SIM_${id}`,
               protocol: 'ocpp1.6',
             },
@@ -119,62 +99,6 @@ const ocppSlice = createSlice({
         }
       },
       reducer(state, action: PayloadAction<ChargePoint>) {
-        state.items[action.payload.id] = action.payload
-        state.order.unshift(action.payload.id)
-        state.selectedId = action.payload.id
-      },
-    },
-    importFromBackend: {
-      prepare(cp: BackendChargePoint, org: OrgRef, zone: { id: string; name: string }) {
-        const id = nanoid(8)
-        const sorted = [...cp.connectors].sort((a, b) => a.connectorNumber - b.connectorNumber)
-        const maxPower = Math.max(0, ...sorted.map((c) => c.maxPowerKw ?? 0))
-        const deviceSettings: DeviceSettings = normalizeDeviceSettings({
-          deviceName: cp.name,
-          ...(cp.model ? { model: cp.model } : {}),
-          connectors: sorted.length || 1,
-          socketType: sorted.map((c) => toSocketType(c.type)),
-          acdc: sorted.some((c) => c.currentType === 'DC') ? 'DC' : 'AC',
-          ...(maxPower > 0 ? { maxPowerKw: maxPower } : {}),
-        })
-        const connectors: Connector[] = sorted.length
-          ? sorted.map((c, i) => ({
-              id: c.connectorNumber,
-              status: 'Available' as const,
-              idTag: i === 0 ? 'DEMO1234' : undefined,
-            }))
-          : [{ id: 1, status: 'Available' as const, idTag: 'DEMO1234' }]
-        return {
-          payload: {
-            id,
-            label: cp.name,
-            config: { csmsUrl: OCPP_GATEWAY_URL, cpId: cp.evseId, protocol: 'ocpp1.6' as const },
-            status: 'disconnected' as ConnectionStatus,
-            paused: false,
-            runtime: { connectors },
-            chargePointConfig: {
-              deviceSettings,
-              ocppConfig: normalizeOcppConfiguration(undefined),
-            },
-            backend: {
-              organizationId: org.id,
-              organizationName: org.name,
-              zoneId: zone.id,
-              zoneName: zone.name,
-              chargePointId: cp.id,
-              evseId: cp.evseId,
-            },
-          } as ChargePoint,
-        }
-      },
-      reducer(state, action: PayloadAction<ChargePoint>) {
-        const existing = Object.values(state.items).find(
-          (x) => x.backend?.chargePointId === action.payload.backend?.chargePointId
-        )
-        if (existing) {
-          state.selectedId = existing.id
-          return
-        }
         state.items[action.payload.id] = action.payload
         state.order.unshift(action.payload.id)
         state.selectedId = action.payload.id
@@ -268,7 +192,6 @@ const ocppSlice = createSlice({
 
 export const {
   addChargePoint,
-  importFromBackend,
   removeChargePoint,
   selectChargePoint,
   updateConfig,

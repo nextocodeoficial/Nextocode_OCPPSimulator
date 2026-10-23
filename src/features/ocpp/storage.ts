@@ -20,6 +20,8 @@ export function loadOcppState(): OcppStateShape | undefined {
         const item = parsed.items[k]
         if (item && typeof item === 'object') {
           item.status = 'disconnected'
+          // Leftover from the removed backend-import integration
+          delete item.backend
           // Advanced Config guarda también en ocpp:device / ocpp:config; fusionar para no perder datos
           const storedDev = loadDeviceSettings(k)
           const storedOcpp = loadOcppConfiguration(k)

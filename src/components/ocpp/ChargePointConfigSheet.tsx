@@ -16,6 +16,7 @@ import {
 import type { ChargePoint, ConnectionConfig, Protocol } from '@/features/ocpp/ocppSlice';
 import { renameChargePoint, updateConfig } from '@/features/ocpp/ocppSlice';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 
@@ -39,6 +40,7 @@ export function ChargePointConfigSheet({
   open,
   onOpenChange,
 }: ChargePointConfigSheetProps) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const form = useForm<FormValues>({
     defaultValues: mapChargePointToForm(chargePoint),
@@ -86,14 +88,14 @@ export function ChargePointConfigSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side='right'>
         <SheetHeader>
-          <SheetTitle>Edit Connection</SheetTitle>
+          <SheetTitle>{t('configSheet.editTitle')}</SheetTitle>
         </SheetHeader>
         <form className='p-4 grid gap-3' onSubmit={submit}>
           <div className='grid gap-1'>
             <label htmlFor='label' className='text-sm font-medium'>
-              Name
+              {t('configSheet.name')}
             </label>
-            <Input id='label' {...form.register('label')} placeholder='CP name' />
+            <Input id='label' {...form.register('label')} placeholder={t('configSheet.namePlaceholder')} />
           </div>
           <div className='grid gap-1'>
             <label htmlFor='csmsUrl' className='text-sm font-medium'>
@@ -116,13 +118,13 @@ export function ChargePointConfigSheet({
             />
           </div>
           <div className='grid gap-1'>
-            <label className='text-sm font-medium'>Protocol</label>
+            <label className='text-sm font-medium'>{t('configSheet.protocol')}</label>
             <Select
               value={protocolValue}
               onValueChange={(value) => form.setValue('protocol', value as Protocol, { shouldDirty: true })}
             >
               <SelectTrigger className='w-full'>
-                <SelectValue placeholder='Select protocol' />
+                <SelectValue placeholder={t('configSheet.selectProtocol')} />
               </SelectTrigger>
               <SelectContent>
                 {protocolOptions.map((option) => (
@@ -139,9 +141,9 @@ export function ChargePointConfigSheet({
               variant='ghost'
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
-            <Button type='submit'>Save changes</Button>
+            <Button type='submit'>{t('configSheet.save')}</Button>
           </div>
         </form>
       </SheetContent>

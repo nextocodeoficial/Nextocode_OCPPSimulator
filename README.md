@@ -1,258 +1,239 @@
+<div align="center">
+
+<img src="./public/logo.svg" alt="Nextocode OCPP Simulator" width="88" height="88" />
+
 # OCPP Simulator
 
-A web-based application for simulating Electric Vehicle (EV) charging stations and testing OCPP communication with Charge Station Management Systems (CSMS).
+**Simulate EV charge points against any OCPP 1.6 CSMS, right from your browser.**
+No installation, no account, no sign-in: create the chargers you need and drive them.
 
-## Table of Contents
+[**▶ Try the live demo**](https://ocppsimulator.vercel.app/) ·
+[Report a bug](https://github.com/nextocodeoficial/Nextocode_OCPPSimulator/issues) ·
+[Nextocode](https://nextocode.com/)
 
-- [What is OCPP?](#what-is-ocpp)
-- [Getting Started](#getting-started)
-- [Creating a Charge Point Connection](#creating-a-charge-point-connection)
-- [Connecting to CSMS](#connecting-to-csms)
-- [Using OCPP Controls](#using-ocpp-controls)
-- [Monitoring Charging Status](#monitoring-charging-status)
-- [Network Traffic Monitoring](#network-traffic-monitoring)
-- [Configuration Options](#configuration-options)
-- [Managing Charge Points](#managing-charge-points)
+![License: MIT](https://img.shields.io/badge/license-MIT-16009b)
+![OCPP 1.6J](https://img.shields.io/badge/OCPP-1.6J-00b38a)
+![React 19](https://img.shields.io/badge/React-19-149eca)
+![i18n](https://img.shields.io/badge/i18n-EN%20%C2%B7%20ES%20%C2%B7%20IT%20%C2%B7%20DE%20%C2%B7%20RU%20%C2%B7%20ZH-4533af)
 
-## What is OCPP?
+<img src="./docs/banner.png" alt="OCPP Simulator banner" width="820" />
 
-**OCPP (Open Charge Point Protocol)** is an open communication standard that enables EV charging stations (Charge Points) to communicate with a central management system (CSMS - Charge Station Management System). 
+</div>
 
-This protocol allows:
-- Remote monitoring and control of charging stations
-- Transaction management and authorization
-- Real-time meter value reporting
-- Firmware updates and configuration management
-- Status notifications and diagnostics
+---
 
-This simulator implements **OCPP 1.6** and allows you to test your CSMS by simulating one or multiple charge points, sending OCPP messages, and monitoring the communication flow.
+## Contents
 
-## UI Overview
+1. [What it does](#what-it-does)
+2. [Quick start (5 minutes)](#quick-start-5-minutes)
+3. [Step-by-step guide](#step-by-step-guide)
+4. [Supported OCPP messages](#supported-ocpp-messages)
+5. [Languages](#languages)
+6. [FAQ and troubleshooting](#faq-and-troubleshooting)
+7. [Run it yourself](#run-it-yourself)
+8. [Contributing](#contributing)
+9. [License](#license)
 
-The application features a modern, intuitive interface for managing charge points and monitoring OCPP communication:
+## What it does
 
-![Connection Page](./public/connection.png)
+OCPP Simulator plays the **charge point** side of OCPP-J (OCPP over WebSocket). You point it at your **CSMS** (Charge Station Management System) and it behaves like real hardware: it boots, sends heartbeats, reports connector status, authorizes RFID tags, starts and stops transactions, streams meter values, and answers commands sent by the CSMS.
 
-*Charge Point Connection Interface - View real-time charging status, control OCPP messages, and manage connections*
+| | |
+|---|---|
+| ⚡ **Many chargers at once** | Create as many charge points as you need. Each one keeps its own WebSocket session, so several can stay connected and charging in parallel. |
+| 🔌 **Multi-connector** | Configure 1 to N connectors per charger, AC or DC, with socket type, power, voltage and current limits. |
+| 🔋 **Realistic metering** | Power, energy, voltage, current and battery SoC evolve during a session and are sent as `MeterValues`. |
+| 📡 **Network inspector** | Every frame in and out (`CALL`, `CALLRESULT`, `CALLERROR`) with its JSON payload. Pause, copy or clear the log. |
+| 🛠️ **Answers CSMS commands** | Remote start/stop, reset, configuration, availability, unlock, trigger message and more. |
+| 💾 **Stays in your browser** | Chargers and their settings live in `localStorage`. Nothing is sent anywhere except to the CSMS you configure. |
+| 🌍 **Six languages** | English, Español, Italiano, Deutsch, Русский and 中文. |
 
-## Getting Started
+## Quick start (5 minutes)
 
-### Prerequisites
+You need a CSMS that accepts OCPP 1.6J WebSocket connections (your own backend, [SteVe](https://github.com/steve-community/steve), a commercial platform, etc.) and to know its endpoint URL.
 
-- Node.js (v18 or higher)
-- Yarn package manager
+1. Open **<https://ocppsimulator.vercel.app/>**.
+2. Click **New charge point**.
+3. Enter the **CSMS URL** (e.g. `wss://csms.example.com/ocpp`) and a **Charge point ID** (e.g. `SIM_001`), then press **Create and connect**.
+4. The charger connects and sends `BootNotification` on its own. Press **StartTx** to begin a charging session.
+5. Watch the messages flow in the **Network traffic** panel and the session in your CSMS.
 
-### Installation
+> [!IMPORTANT]
+> Many CSMS only accept charge points that were registered beforehand. If the connection is closed right away or `BootNotification` is rejected, add the **Charge point ID** to your CSMS first. To start transactions, the CSMS must also accept the **idTag** (default `DEMO1234`).
 
-1. Install dependencies:
+## Step-by-step guide
+
+### 1. Create a charge point
+
+Click **New charge point** (dashboard, or the button at the bottom of the sidebar) and fill in:
+
+| Field | Required | Description |
+|---|---|---|
+| **Name** | No | Friendly label shown in the sidebar and dashboard, e.g. `Parking lot A`. |
+| **CSMS URL** | Yes | WebSocket endpoint of your central system. Must start with `ws://` or `wss://`. |
+| **Charge point ID** | Yes | Identity of the charger in your CSMS. The simulator connects to `<CSMS URL>/<Charge point ID>` using the `ocpp1.6` subprotocol. |
+
+The charger is saved in your browser and connects immediately.
+
+> [!TIP]
+> The demo runs over HTTPS, so browsers only allow **`wss://`** endpoints from it. To test a CSMS on `ws://localhost`, [run the simulator locally](#run-it-yourself).
+
+### 2. Connect and register
+
+On the charger page the header shows the connection state:
+
+- 🟢 **Connected**: the WebSocket is open.
+- 🟡 **Connecting**: handshake in progress.
+- ⚪ **Disconnected**: closed or rejected. Use **Connect** to retry.
+
+On every connection the simulator sends `BootNotification` automatically (retrying while the CSMS answers `Pending` or `Rejected`) and then keeps sending `Heartbeat` at the configured `HeartbeatInterval`. You can also send both manually from the controls panel.
+
+### 3. Simulate a charging session
+
+A typical flow from the **OCPP controls** panel:
+
+1. Pick the **connector** you want to use.
+2. *(Optional)* **Authorize** to validate the idTag.
+3. **StartTx**: authorizes the idTag, starts the transaction and the connector switches to `Charging`.
+4. `MeterValues` are sent periodically; follow them in **Charging status**.
+5. **StopTx**: closes the transaction with the final meter reading. The connector goes to `Finishing`.
+6. **Unlock cable**: the connector goes back to `Available`.
+
+Use **Status** to send any `StatusNotification` (e.g. `Faulted`, `Unavailable`) and test how your CSMS reacts.
+
+### 4. Run several chargers in parallel
+
+Repeat step 1 with different charge point IDs. Each charger has its own WebSocket session and keeps running while you switch between them from the sidebar, so you can simulate a whole site or reproduce concurrency issues in your CSMS. The dashboard shows how many are connected at a glance.
+
+### 5. Inspect the traffic
+
+The **Network traffic** panel lists every OCPP frame with direction, type, action and timestamp. Click a frame to see its JSON payload. Use **Pause**, **Copy** (exports the log as JSON) and **Clear** while debugging.
+
+### 6. Tune the hardware profile
+
+- **Basic config**: name, CSMS URL, charge point ID and protocol.
+- **Advanced config**:
+  - *Device settings*: device name, model, AC/DC, number of connectors, socket type and cable lock per connector, max power, nominal voltage, max current, RFID reader, display, initial battery SoC and price per kWh.
+  - *OCPP configuration*: heartbeat and meter value intervals, sampled measurands, feature profiles, authorization behaviour and other configuration keys reported through `GetConfiguration`.
+
+Changes are saved locally and survive page reloads.
+
+### 7. Delete a charger
+
+Open the charger and press **Delete**. It is disconnected and removed from your browser together with its traffic log.
+
+## Supported OCPP messages
+
+**Charge point → CSMS**
+
+`BootNotification` · `Heartbeat` · `StatusNotification` · `Authorize` · `StartTransaction` · `MeterValues` · `StopTransaction`
+
+**CSMS → charge point** (handled automatically)
+
+`RemoteStartTransaction` · `RemoteStopTransaction` · `Reset` · `ChangeAvailability` · `ChangeConfiguration` · `GetConfiguration` · `UnlockConnector` · `TriggerMessage` · `ClearCache` · `DataTransfer` · `SetChargingProfile` · `ClearChargingProfile` · `GetCompositeSchedule` · `ReserveNow` · `CancelReservation` · `GetLocalListVersion` · `SendLocalList` · `GetDiagnostics` · `UpdateFirmware`
+
+## Languages
+
+The interface is available in **English, Español, Italiano, Deutsch, Русский and 中文**. The language is detected from your browser and can be changed at any time from the language menu in the header. It only changes the interface: open connections keep running and OCPP messages are always sent as defined by the specification.
+
+## FAQ and troubleshooting
+
+<details>
+<summary><b>Do I need an account?</b></summary>
+
+No. There is no sign-in and no server-side storage. Everything lives in your browser's `localStorage`, so chargers are per browser and per device. Clearing site data removes them.
+</details>
+
+<details>
+<summary><b>The charger goes straight back to "Disconnected"</b></summary>
+
+- Check the URL and that it uses `wss://` when the simulator is served over HTTPS.
+- Make sure the CSMS accepts the `ocpp1.6` WebSocket subprotocol.
+- Many CSMS reject unknown identities: register the charge point ID first.
+- Open the **Network traffic** panel and your browser's developer console to see the close reason.
+</details>
+
+<details>
+<summary><b>StartTx is rejected</b></summary>
+
+The CSMS answered `Authorize`/`StartTransaction` with an idTag status other than `Accepted`. Register the idTag (default `DEMO1234`) as an RFID card in your CSMS, or change the idTag on the connector.
+</details>
+
+<details>
+<summary><b>Is my data sent to Nextocode?</b></summary>
+
+No. The only network traffic generated by the simulator is the WebSocket connection to the CSMS you configure (plus anonymous page analytics on the public demo).
+</details>
+
+## Run it yourself
+
+### Requirements
+
+- Node.js 20+
+- Yarn 1.x
+
+### Local development
+
 ```bash
+git clone https://github.com/nextocodeoficial/Nextocode_OCPPSimulator.git
+cd Nextocode_OCPPSimulator
 yarn install
-```
-
-2. Start the development server:
-```bash
 yarn dev
 ```
 
-3. Open your browser and navigate to the URL shown in the terminal (typically `http://localhost:5173`)
+Open the URL printed in the terminal (usually <http://localhost:5173>).
 
-## Creating a Charge Point Connection
+### Configuration (optional)
 
-1. **Open the sidebar** - Click the sidebar toggle button in the top-left corner if it's collapsed
-2. **Click "New Connection"** - Use the button in the sidebar footer or the "+" button next to "Connections"
-3. **Fill in the connection details**:
-   - **Name** (optional): A friendly name for this charge point (e.g., "Test Station 1")
-   - **CSMS URL**: WebSocket base del CSMS OCPP (en este monorepo: **`central-system-ocpp` en Go**, por defecto **`ws://localhost:8887`**; la URL final del punto de carga es `ws://localhost:8887/<CP_ID>`). No uses el puerto de Centrifugo (9000): ese es otro protocolo (Centrifuge), no OCPP-J.
-   - **CP ID**: The unique identifier for this charge point (e.g., `SIM_001`)
-4. **Click "Create"** - The charge point will be created and you'll be automatically navigated to its connection page
+Copy `.env copy.example` to `.env` and adjust:
 
-The connection will attempt to auto-connect immediately after creation.
+| Variable | Default | Description |
+|---|---|---|
+| `VITE_DEFAULT_CSMS_URL` | *(empty)* | CSMS URL pre-filled in the **New charge point** form. Users can still change it. |
+| `VITE_BASE_URL` | `/` | Sub-path when hosting under a folder (e.g. GitHub Pages). |
 
-## Connecting to CSMS
-
-Once you've created a charge point, you can manage its connection:
-
-1. **View connection status** - The status indicator shows:
-   - 🟢 **Green**: Connected
-   - 🟡 **Yellow**: Connecting
-   - ⚪ **Gray**: Disconnected
-
-2. **Manual connection**:
-   - Click the **"Connect"** button in the top-right action bar
-   - Wait for the status to change to "connected"
-
-3. **Disconnect**:
-   - Click the **"Disconnect"** button to close the WebSocket connection
-
-## Using OCPP Controls
-
-The **OCPP Controls** panel provides buttons to send various OCPP messages to your CSMS:
-
-### Basic Messages
-
-- **BootNotification**: Registers the charge point with the CSMS. Should be sent after connection.
-- **Heartbeat**: Keeps the connection alive and provides current timestamp.
-- **Status**: Sends a StatusNotification with connector status (Available, Occupied, etc.).
-- **Authorize**: Authorizes an RFID tag for charging.
-
-### Transaction Management
-
-- **StartTx**: 
-  - Authorizes the configured ID tag
-  - Starts a charging transaction
-  - Begins sending periodic MeterValues
-  - Changes connector status to "Charging"
-
-- **MeterValues**: Manually sends current meter readings (power, energy, voltage, current, SoC).
-
-- **StopTx**: 
-  - Stops the active transaction
-  - Sends final meter values
-  - Changes connector status to "Finishing"
-
-- **Unlock Cable**: Changes connector status back to "Available" after charging.
-
-### Usage Flow
-
-A typical charging session flow:
-
-1. **Connect** to CSMS
-2. **BootNotification** - Register the charge point
-3. **Authorize** - Verify the RFID tag (optional, StartTx does this automatically)
-4. **StartTx** - Begin charging session
-5. Monitor **MeterValues** being sent automatically
-6. **StopTx** - End the charging session
-7. **Unlock Cable** - Make connector available again
-
-## Monitoring Charging Status
-
-The **Charging Status** panel displays real-time information:
-
-- **Status**: Current charging state (Charging / Not Charging)
-- **Charging Type**: AC or DC charging
-- **Device**: Device name from configuration
-- **Transaction ID**: Active transaction identifier
-- **Battery SoC** (DC only): State of Charge percentage with progress bar
-- **Power**: Current power draw in kW
-- **Current**: Current in Amperes
-- **Voltage**: Voltage in Volts
-- **Energy**: Total energy delivered in kWh
-- **Session Progress** (AC): Progress bar showing charging session completion
-
-All values update automatically as MeterValues are received.
-
-## Network Traffic Monitoring
-
-The **Network Traffic** panel shows all OCPP messages exchanged between the charge point and CSMS:
-
-![Network Traffic Monitoring](./public/network.png)
-
-*Real-time OCPP message monitoring with detailed JSON payload inspection*
-
-- **Incoming messages** (from CSMS): Displayed with incoming indicators
-- **Outgoing messages** (to CSMS): Displayed with outgoing indicators
-- **Message details**: Click on any message to view its full JSON payload
-- **Pause/Resume**: Toggle to pause automatic scrolling when new messages arrive
-- **Copy**: Copy all messages as JSON to clipboard
-- **Clear**: Remove all messages from the log
-
-This is useful for debugging and understanding the OCPP message flow.
-
-## Configuration Options
-
-### Basic Configuration
-
-Click **"Basic Config"** to edit:
-- **Name**: Charge point display name
-- **CSMS URL**: WebSocket server URL
-- **CP ID**: Charge point identifier
-- **Protocol**: OCPP version (1.6 or 2.0.1)
-
-### Advanced Configuration
-
-Click **"Advanced Config"** to configure:
-
-![Advanced Configuration](./public/config.png)
-
-*Comprehensive configuration interface with modular sections for device settings and OCPP parameters*
-
-- **Device Settings**: Device name, power limits, voltage, current, connector types, AC/DC mode
-- **OCPP Configuration**: Heartbeat interval, meter value intervals, feature profiles, authorization settings, and more
-
-Changes to configuration are saved locally and persist across sessions.
-
-## Managing Charge Points
-
-### Viewing All Connections
-
-- All created charge points appear in the sidebar under "Connections"
-- Each entry shows:
-  - Connection status indicator (green/yellow/gray dot)
-  - Charge point name or label
-
-### Switching Between Charge Points
-
-- Click any charge point in the sidebar to navigate to its connection page
-- You can have multiple charge points connected simultaneously
-
-### Deleting a Charge Point
-
-1. Navigate to the charge point's connection page
-2. Click the **"Delete"** button in the top-right action bar
-3. Confirm deletion in the dialog
-4. The charge point will be removed and disconnected
-
-### Renaming a Charge Point
-
-1. Open **"Basic Config"**
-2. Change the **Name** field
-3. Click **"Save changes"**
-
-## Tips
-
-- **Multiple Simulations**: Create multiple charge points to simulate a charging network
-- **Testing Scenarios**: Use different CP IDs and configurations to test various scenarios
-- **Network Debugging**: Use the Network Traffic panel to inspect exact OCPP message formats
-- **Battery Simulation**: The app simulates battery charging for DC mode with realistic SoC progression
-- **Auto-Connect**: Charge points attempt to auto-connect when you navigate to their page
-
-## Using with backNextoway
-
-The simulator can import chargers registered in backNextoway and simulate them against the real OCPP gateway (`central-system-ocpp`). It is read-only on the backend: create organizations, zones and chargers in the backend admin panel / Swagger.
-
-1. Start the backend stack (`make dev-up`) and seed a super admin (`pnpm seed:super-admin`).
-2. In the backend, create an organization, a charging zone and a charger whose `evseId` is, for example, `SIM-001` (add connectors and an RFID card for authorization tests).
-3. Allow the simulator origin in the backend `CORS_ORIGIN` (not committed), e.g. `http://localhost:5173,http://localhost:3000`. The refresh cookie requires credentialed CORS.
-4. Copy `.env.example` to `.env` if your URLs differ (`VITE_BACKEND_API_URL`, `VITE_OCPP_GATEWAY_URL`) and run `yarn dev`.
-5. Click **Backend login** in the header and sign in. Super admins can pick any organization; other users see their memberships.
-6. Open **Import chargers**, choose an organization, and press **Import** on a charger. It is created locally with `CP ID = evseId`, the backend connectors and the gateway URL.
-7. Open the charger and connect. The gateway connects to `ws://<gateway>/<evseId>` using the `ocpp1.6` subprotocol; unknown EVSE IDs are rejected.
-
-The dashboard and sidebar group imported chargers by organization; chargers created by hand are listed under **Local**. The access token is kept in `sessionStorage` (never `localStorage`) and refreshed through the HttpOnly cookie.
-
-## Development
-
-### Build for Production
+### Docker
 
 ```bash
-yarn build
+docker compose up --build
+# → http://localhost:3000
 ```
 
-### Preview Production Build
+Pass build arguments to customise it, e.g. `VITE_DEFAULT_CSMS_URL=wss://csms.example.com/ocpp docker compose up --build`.
 
-```bash
-yarn preview
-```
+### Deploy to Vercel
 
-### Tests
+Import the repository in Vercel with the **Vite** preset (build command `yarn build`, output directory `dist`). The app uses hash routing, so no rewrite rules are needed.
 
-```bash
-yarn test
-```
+### Scripts
 
-### Linting
+| Command | Description |
+|---|---|
+| `yarn dev` | Start the development server |
+| `yarn build` | Type-check and build for production |
+| `yarn preview` | Preview the production build |
+| `yarn test` | Run the test suite (Vitest) |
+| `yarn lint` | Lint the project (ESLint) |
 
-```bash
-yarn lint
-```
+### Tech stack
 
+React 19 · TypeScript · Vite · Redux Toolkit · TanStack Query · Tailwind CSS 4 · Radix UI · i18next · Vitest
+
+## Contributing
+
+Issues and pull requests are welcome.
+
+1. Fork the repository and create a branch: `git checkout -b feat/my-feature`.
+2. Keep `yarn test`, `yarn lint` and `yarn build` green.
+3. When you add UI text, add the key to **all six** files in `src/i18n/locales/` (a test checks that they stay in sync).
+4. Use [Conventional Commits](https://www.conventionalcommits.org/) and open a pull request.
+
+## License
+
+Released under the [MIT License](./LICENSE).
+
+---
+
+<div align="center">
+<sub>© 2026 <a href="https://nextocode.com/">Nextocode</a>. All rights reserved.</sub>
+</div>

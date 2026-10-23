@@ -11,13 +11,12 @@ interface SEOProps {
 }
 
 const defaultSEO = {
-  title: 'OCPP Simulator - EV Charging Station Testing Tool',
+  title: 'Nextocode OCPP Simulator',
   description: 'Web-based OCPP simulator for testing Electric Vehicle charging stations. Simulate charge points, test OCPP 1.6 and 2.0.1 protocols, monitor network traffic, and manage charging sessions.',
   keywords: 'OCPP, EV charging, electric vehicle, charging station, OCPP simulator, charge point, CSMS, EV testing, OCPP 1.6, OCPP 2.0, WebSocket, charging protocol',
   image: '/og-image.png',
   type: 'website',
-  siteName: 'OCPP Simulator',
-  twitterHandle: '@ocppsimulator',
+  siteName: 'Nextocode OCPP Simulator',
 };
 
 export function SEO({
@@ -78,8 +77,6 @@ export function SEO({
     updateMetaTag('twitter:title', fullTitle, 'name');
     updateMetaTag('twitter:description', metaDescription, 'name');
     updateMetaTag('twitter:image', metaImage, 'name');
-    updateMetaTag('twitter:site', defaultSEO.twitterHandle, 'name');
-    updateMetaTag('twitter:creator', defaultSEO.twitterHandle, 'name');
 
     updateLinkTag('canonical', currentUrl);
 

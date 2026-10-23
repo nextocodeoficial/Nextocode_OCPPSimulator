@@ -9,11 +9,9 @@ RUN yarn install --frozen-lockfile
 COPY . .
 
 # Vite inlines these at build time; override with --build-arg.
-ARG VITE_BACKEND_API_URL=http://localhost:3001
-ARG VITE_OCPP_GATEWAY_URL=ws://localhost:8887
+ARG VITE_DEFAULT_CSMS_URL=
 ARG VITE_BASE_URL=
-ENV VITE_BACKEND_API_URL=$VITE_BACKEND_API_URL \
-    VITE_OCPP_GATEWAY_URL=$VITE_OCPP_GATEWAY_URL \
+ENV VITE_DEFAULT_CSMS_URL=$VITE_DEFAULT_CSMS_URL \
     VITE_BASE_URL=$VITE_BASE_URL
 
 RUN yarn build

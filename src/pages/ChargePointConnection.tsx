@@ -25,10 +25,12 @@ import { useChargingStatus } from '@/hooks/useChargingStatus';
 import type { RootState } from '@/store/store';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export default function ChargePointConnection() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const cp = useSelector((s: RootState) => (id ? s.ocpp.items[id] : undefined));
   const dispatch = useDispatch();
@@ -64,19 +66,18 @@ export default function ChargePointConnection() {
       <DashboardLayout>
         <div className='p-4 sm:p-6'>
           <div className='text-base sm:text-lg font-semibold'>
-            Charge point not found
+            {t('cp.notFoundTitle')}
           </div>
           <div className='mt-2 text-xs sm:text-sm text-muted-foreground break-words'>
-            The ID "{id}" was not found in your local state. Go back to
-            dashboard and select a charge point.
+            {t('cp.notFoundBody', { id })}
           </div>
           <div className='mt-4'>
             <Button
               size='sm'
-              onClick={() => (window.location.hash = '#/')}
+              onClick={() => navigate('/')}
               className='w-full sm:w-auto'
             >
-              Back to Dashboard
+              {t('cp.backToDashboard')}
             </Button>
           </div>
         </div>
@@ -120,15 +121,11 @@ export default function ChargePointConnection() {
   return (
     <>
       <SEO
-        title={`Charge Point: ${cp?.label || id}`}
-        description={`Monitor and control OCPP charge point ${
-          cp?.label || id
-        }. View real-time charging status, send OCPP messages, monitor network traffic, and manage charging sessions.`}
-        keywords={`OCPP charge point, ${
-          cp?.label || id
-        }, EV charging simulation, OCPP monitoring, charge point control`}
+        title={t('cp.seoTitle', { name: cp?.label || id })}
+        description={t('cp.seoDescription', { name: cp?.label || id })}
+        keywords={t('cp.seoKeywords', { name: cp?.label || id })}
       />
-      <DashboardLayout>
+      <DashboardLayout breadcrumbItems={[{ label: cp.label }]}>
         <div className='grid gap-4'>
           <div className='flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between'>
             <div className='flex-1 min-w-0'>
@@ -158,7 +155,7 @@ export default function ChargePointConnection() {
                       : 'bg-slate-400'
                   }`}
                 />
-                <span className='capitalize'>{cp.status}</span>
+                <span>{t(`status.${cp.status}`)}</span>
               </div>
             </div>
             <div className='flex items-center gap-2 sm:shrink-0'>
@@ -169,7 +166,7 @@ export default function ChargePointConnection() {
                   onClick={() => setConfigOpen(true)}
                   className='text-xs sm:text-sm'
                 >
-                  Basic Config
+                  {t('cp.basicConfig')}
                 </Button>
                 <Button
                   size='sm'
@@ -177,7 +174,7 @@ export default function ChargePointConnection() {
                   onClick={() => setAdvancedConfigOpen(true)}
                   className='text-xs sm:text-sm'
                 >
-                  Advanced Config
+                  {t('cp.advancedConfig')}
                 </Button>
                 <Button
                   size='sm'
@@ -185,7 +182,7 @@ export default function ChargePointConnection() {
                   onClick={() => setDeleteOpen(true)}
                   className='text-xs sm:text-sm'
                 >
-                  Delete
+                  {t('common.delete')}
                 </Button>
               </div>
               <div className='flex items-center gap-2 sm:border-l sm:pl-2'>
@@ -197,9 +194,9 @@ export default function ChargePointConnection() {
                   className='text-xs sm:text-sm'
                 >
                   {connect.isPending || cp.status === 'connecting' ? (
-                    'Connecting...'
+                    t('cp.connecting')
                   ) : (
-                    'Connect'
+                    t('cp.connect')
                   )}
                 </Button>
                 <Button
@@ -209,7 +206,7 @@ export default function ChargePointConnection() {
                   disabled={cp.status === 'disconnected' || disconnect.isPending}
                   className='text-xs sm:text-sm'
                 >
-                  Disconnect
+                  {t('cp.disconnect')}
                 </Button>
               </div>
               <div className='flex sm:hidden items-center gap-2'>
@@ -219,7 +216,7 @@ export default function ChargePointConnection() {
                   onClick={() => setConfigOpen(true)}
                   className='text-xs'
                 >
-                  Basic
+                  {t('cp.basicShort')}
                 </Button>
                 <Button
                   size='sm'
@@ -227,7 +224,7 @@ export default function ChargePointConnection() {
                   onClick={() => setAdvancedConfigOpen(true)}
                   className='text-xs'
                 >
-                  Advanced
+                  {t('cp.advancedShort')}
                 </Button>
                 <Button
                   size='sm'
@@ -235,7 +232,7 @@ export default function ChargePointConnection() {
                   onClick={() => setDeleteOpen(true)}
                   className='text-xs'
                 >
-                  Delete
+                  {t('common.delete')}
                 </Button>
               </div>
             </div>
@@ -275,20 +272,19 @@ export default function ChargePointConnection() {
         <Dialog open={deleteOpen} onOpenChange={(next) => setDeleteOpen(next)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Delete connection?</DialogTitle>
+              <DialogTitle>{t('cp.deleteTitle')}</DialogTitle>
               <DialogDescription>
-                This will remove "{cp.label}" and disconnect the simulated
-                charge point.
+                {t('cp.deleteDescription', { label: cp.label })}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
               <DialogClose asChild>
                 <Button type='button' variant='outline'>
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
               </DialogClose>
               <Button type='button' variant='destructive' onClick={onDelete}>
-                Delete
+                {t('common.delete')}
               </Button>
             </DialogFooter>
           </DialogContent>

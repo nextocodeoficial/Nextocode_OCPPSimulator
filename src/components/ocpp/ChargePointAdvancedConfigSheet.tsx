@@ -8,6 +8,7 @@ import { getEffectiveDeviceSettings, getEffectiveOcppConfiguration } from '@/fea
 import type { DeviceSettings, OcppConfiguration } from '@/types/ocpp';
 import { Settings, Zap, Wifi } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { DeviceSettingsForm } from './DeviceSettingsForm';
 import { OcppConfigurationForm } from './OcppConfigurationForm';
@@ -23,6 +24,7 @@ export function ChargePointAdvancedConfigSheet({
   open,
   onOpenChange,
 }: ChargePointAdvancedConfigSheetProps) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState('device');
 
@@ -67,7 +69,7 @@ export function ChargePointAdvancedConfigSheet({
                 <Settings className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
-                <SheetTitle className="text-xl">Advanced Configuration</SheetTitle>
+                <SheetTitle className="text-xl">{t('configSheet.advancedTitle')}</SheetTitle>
                 <p className="text-sm text-muted-foreground mt-1">
                   {chargePoint.label}
                 </p>
@@ -84,7 +86,7 @@ export function ChargePointAdvancedConfigSheet({
                   className="rounded-b-none h-10 px-4 gap-2"
                 >
                   <Zap className="h-4 w-4" />
-                  Device Settings
+                  {t('configSheet.deviceTab')}
                 </Button>
                 <Button
                   variant={activeTab === 'ocpp' ? 'default' : 'ghost'}
@@ -92,7 +94,7 @@ export function ChargePointAdvancedConfigSheet({
                   className="rounded-b-none h-10 px-4 gap-2"
                 >
                   <Wifi className="h-4 w-4" />
-                  OCPP Configuration
+                  {t('configSheet.ocppTab')}
                 </Button>
               </div>
               

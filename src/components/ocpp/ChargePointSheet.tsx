@@ -3,15 +3,17 @@ import { Input } from '@/components/ui/input';
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { OCPP_GATEWAY_URL } from '@/config/env';
+import { DEFAULT_CSMS_URL } from '@/config/env';
 import { addChargePoint, setStatus } from '@/features/ocpp/ocppSlice';
 import { connectWs } from '@/features/ocpp/wsManager';
 import { buildOcppWebSocketUrl } from '@/utils/ocpp';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
@@ -31,13 +33,15 @@ export function ChargePointSheet({ open, onOpenChange }: Props) {
   const form = useForm<FormValues>({
     defaultValues: {
       label: '',
-      csmsUrl: OCPP_GATEWAY_URL,
+      csmsUrl: DEFAULT_CSMS_URL,
       cpId: '',
     },
   });
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const { errors } = form.formState;
 
   const onSubmit = form.handleSubmit((values) => {
     const action: any = dispatch(
@@ -66,6 +70,7 @@ export function ChargePointSheet({ open, onOpenChange }: Props) {
     } catch {
       // ignore invalid URL here
     }
+    form.reset();
     onOpenChange(false);
     navigate(`/cp/${id}`);
   });
@@ -74,38 +79,48 @@ export function ChargePointSheet({ open, onOpenChange }: Props) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side='right'>
         <SheetHeader>
-          <SheetTitle>New Charge Point</SheetTitle>
+          <SheetTitle>{t('newCp.title')}</SheetTitle>
+          <SheetDescription>{t('newCp.description')}</SheetDescription>
         </SheetHeader>
         <form className='p-4 grid gap-3' onSubmit={onSubmit}>
           <div className='grid gap-1'>
             <label htmlFor='label' className='text-sm font-medium'>
-              Name
+              {t('newCp.name')}
             </label>
             <Input
               id='label'
-              placeholder='CP name (optional)'
+              placeholder={t('newCp.namePlaceholder')}
               {...form.register('label')}
             />
           </div>
           <div className='grid gap-1'>
             <label htmlFor='csmsUrl' className='text-sm font-medium'>
-              CSMS URL
+              {t('newCp.csmsUrl')}
             </label>
             <Input
               id='csmsUrl'
-              placeholder={OCPP_GATEWAY_URL}
-              {...form.register('csmsUrl', { required: true })}
+              placeholder='wss://csms.example.com/ocpp'
+              aria-invalid={!!errors.csmsUrl}
+              {...form.register('csmsUrl', {
+                required: t('newCp.required'),
+                validate: (v) => /^wss?:\/\//i.test(v.trim()) || t('newCp.invalidUrl'),
+              })}
             />
+            <p className={errors.csmsUrl ? 'text-xs text-destructive' : 'text-xs text-muted-foreground'}>
+              {errors.csmsUrl?.message || t('newCp.csmsUrlHint')}
+            </p>
           </div>
           <div className='grid gap-1'>
             <label htmlFor='cpId' className='text-sm font-medium'>
-              CP ID
+              {t('newCp.cpId')}
             </label>
             <Input
               id='cpId'
               placeholder='SIM_001'
-              {...form.register('cpId', { required: true })}
+              aria-invalid={!!errors.cpId}
+              {...form.register('cpId', { required: t('newCp.required') })}
             />
+            {errors.cpId && <p className='text-xs text-destructive'>{errors.cpId.message}</p>}
           </div>
           <div className='pt-2 flex justify-end gap-2'>
             <Button
@@ -113,9 +128,9 @@ export function ChargePointSheet({ open, onOpenChange }: Props) {
               variant='ghost'
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t('newCp.cancel')}
             </Button>
-            <Button type='submit'>Create</Button>
+            <Button type='submit'>{t('newCp.create')}</Button>
           </div>
         </form>
       </SheetContent>

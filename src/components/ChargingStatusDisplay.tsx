@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Battery, Clock, Gauge, Zap, TrendingUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { Connector } from '@/types/ocpp';
 
 interface MeterValue {
@@ -43,6 +44,7 @@ export function ChargingStatusDisplay({
   connectors = [],
   deviceSettings,
 }: ChargingStatusDisplayProps) {
+  const { t } = useTranslation();
   const numConnectors = deviceSettings?.connectors || 1;
   const renderConnectorCard = (connectorId: number, data?: ChargingDataVM) => {
     const connector = connectors.find(c => c.id === connectorId);
@@ -81,10 +83,10 @@ export function ChargingStatusDisplay({
         <CardHeader>
           <CardTitle className='flex items-center gap-2'>
             <Zap className='h-5 w-5' />
-            Connector {connectorId}
+            {t('chargingStatus.connector', { id: connectorId })}
             {data && (
               <Badge variant='outline' className='ml-auto'>
-                {data.transactionId ? `TX ${data.transactionId}` : 'No TX'}
+                {data.transactionId ? `TX ${data.transactionId}` : t('chargingStatus.noTx')}
               </Badge>
             )}
           </CardTitle>
@@ -98,7 +100,7 @@ export function ChargingStatusDisplay({
                 ) : (
                   <Battery className='h-4 w-4 text-muted-foreground' />
                 )}
-                <span className='text-sm font-medium'>Status</span>
+                <span className='text-sm font-medium'>{t('chargingStatus.status')}</span>
               </div>
               <Badge
                 variant={isConnectorCharging ? 'default' : 'secondary'}
@@ -115,7 +117,7 @@ export function ChargingStatusDisplay({
             <div className='flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3'>
               <div className='flex items-center gap-2'>
                 <Gauge className='h-4 w-4 text-muted-foreground' />
-                <span className='text-sm font-medium'>Power</span>
+                <span className='text-sm font-medium'>{t('chargingStatus.power')}</span>
               </div>
               <span className='text-sm font-mono'>
                 {powerKW.toFixed(2)} kW
@@ -124,7 +126,7 @@ export function ChargingStatusDisplay({
             <div className='flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3'>
               <div className='flex items-center gap-2'>
                 <TrendingUp className='h-4 w-4 text-muted-foreground' />
-                <span className='text-sm font-medium'>Current</span>
+                <span className='text-sm font-medium'>{t('chargingStatus.current')}</span>
               </div>
               <span className='text-sm font-mono'>
                 {currentA.toFixed(1)} A
@@ -133,7 +135,7 @@ export function ChargingStatusDisplay({
             <div className='flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3'>
               <div className='flex items-center gap-2'>
                 <Battery className='h-4 w-4 text-muted-foreground' />
-                <span className='text-sm font-medium'>Voltage</span>
+                <span className='text-sm font-medium'>{t('chargingStatus.voltage')}</span>
               </div>
               <span className='text-sm font-mono'>
                 {voltageV.toFixed(0)} V
@@ -144,7 +146,7 @@ export function ChargingStatusDisplay({
           {chargingType === 'DC' && socPct !== undefined && (
             <div className='space-y-2'>
               <div className='flex items-center justify-between text-sm'>
-                <span>Battery Level</span>
+                <span>{t('chargingStatus.batteryLevel')}</span>
                 <span>{socPct.toFixed(1)}%</span>
               </div>
               <Progress value={socPct} className='h-2' />
@@ -157,7 +159,7 @@ export function ChargingStatusDisplay({
             <div className='flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3'>
               <div className='flex items-center gap-2'>
                 <Zap className='h-4 w-4 text-muted-foreground' />
-                <span className='text-sm font-medium'>Energy</span>
+                <span className='text-sm font-medium'>{t('chargingStatus.energy')}</span>
               </div>
               <span className='text-sm font-mono'>
                 {energyWh.toFixed(2)} Wh
@@ -166,7 +168,7 @@ export function ChargingStatusDisplay({
             <div className='flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3'>
               <div className='flex items-center gap-2'>
                 <Clock className='h-4 w-4 text-muted-foreground' />
-                <span className='text-sm font-medium'>Progress</span>
+                <span className='text-sm font-medium'>{t('chargingStatus.progress')}</span>
               </div>
               <span className='text-sm font-mono'>
                 {chargingProgress.toFixed(1)}%

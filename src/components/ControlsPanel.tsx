@@ -14,6 +14,7 @@ import { getMeterForCp } from '@/services/meterModel';
 import { Plug, Power, Activity, Lock } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 
 type PanelForm = {
@@ -31,6 +32,7 @@ interface ControlsPanelProps {
 }
 
 export const ControlsPanel = ({ cp, deviceSettings }: ControlsPanelProps) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { call } = useOcppConnection(cp);
   const connected = cp.status === 'connected';
@@ -110,20 +112,20 @@ export const ControlsPanel = ({ cp, deviceSettings }: ControlsPanelProps) => {
     try {
       await emitDualStatusNotification('Available');
     } catch {
-      showToast.error('No se pudo enviar Available', 'StatusNotification');
+      showToast.error(t('controls.sendFailed', { status: 'Available' }), 'StatusNotification');
     }
   };
 
   const onPreparing = async () => {
     if (cp.runtime?.connectors?.find(c => c.id === connectorId)?.transactionId != null) {
-      showToast.warning('Hay una transacción activa en este conector. Para el cable usa StopTx primero.', 'Preparing');
+      showToast.warning(t('controls.activeTransaction'), 'Preparing');
       return;
     }
     try {
       await emitDualStatusNotification('Preparing');
-      showToast.success('Cable conectado al vehículo (Preparing). Puedes iniciar la sesión con StartTx.', 'Preparing');
+      showToast.success(t('controls.cablePlugged'), 'Preparing');
     } catch {
-      showToast.error('No se pudo enviar Preparing', 'StatusNotification');
+      showToast.error(t('controls.sendFailed', { status: 'Preparing' }), 'StatusNotification');
     }
   };
 
@@ -138,8 +140,8 @@ export const ControlsPanel = ({ cp, deviceSettings }: ControlsPanelProps) => {
     const conn = cp.runtime?.connectors?.find(c => c.id === connectorId);
     if (conn?.status !== 'Preparing') {
       showToast.error(
-        'El conector debe estar en Preparing (cable enchufado al coche). Pulsa «Preparing (enchufado)» antes de StartTx.',
-        'Estado requerido'
+        t('controls.stateRequiredBody'),
+        t('controls.stateRequiredTitle')
       );
       return;
     }
@@ -162,8 +164,8 @@ export const ControlsPanel = ({ cp, deviceSettings }: ControlsPanelProps) => {
     const result = parseStartTransactionResult(res);
     if (!result.accepted) {
       showToast.error(
-        `El CSMS rechazó la transacción (estado del idTag: ${result.status}). Registra el idTag como tarjeta RFID en el backend.`,
-        'StartTransaction rechazada'
+        t('controls.txRejectedBody', { status: result.status }),
+        t('controls.txRejectedTitle')
       );
       return;
     }
@@ -224,7 +226,7 @@ export const ControlsPanel = ({ cp, deviceSettings }: ControlsPanelProps) => {
       <CardHeader>
         <CardTitle className='flex items-center gap-2'>
           <Plug className='h-5 w-5' />
-          OCPP Controls
+          {t('controls.title')}
           {deviceSettings?.deviceName && (
             <Badge variant='outline' className='ml-auto'>
               {deviceSettings.deviceName}
@@ -234,7 +236,7 @@ export const ControlsPanel = ({ cp, deviceSettings }: ControlsPanelProps) => {
       </CardHeader>
       <CardContent className='space-y-6'>
         <div className='flex items-center justify-between rounded-lg border bg-muted/30 px-4 py-3'>
-          <span className='font-medium text-sm'>Connector</span>
+          <span className='font-medium text-sm'>{t('controls.connector')}</span>
           <Select value={selectedConnectorId.toString()} onValueChange={(value) => setSelectedConnectorId(Number(value))}>
             <SelectTrigger className='w-32'>
               <SelectValue />
@@ -253,10 +255,10 @@ export const ControlsPanel = ({ cp, deviceSettings }: ControlsPanelProps) => {
           <div className='space-y-2.5'>
             <div className='flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide'>
               <Activity className='h-3.5 w-3.5' />
-              Connection & Status
+              {t('controls.connectionStatus')}
             </div>
             <p className='text-[11px] text-muted-foreground leading-snug'>
-              Se envía cada estado al conector seleccionado y al conector <strong>0</strong> (punto de carga completo) para que el back-office y ev-charging-new actualicen el estado global, no solo «Inicial».
+              <Trans i18nKey='controls.connectionHint' components={{ strong: <strong /> }} />
             </p>
             <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2'>
               <Button 
@@ -292,7 +294,7 @@ export const ControlsPanel = ({ cp, deviceSettings }: ControlsPanelProps) => {
                 disabled={!connected}
                 className='h-9 text-xs sm:text-sm'
               >
-                Preparing (enchufado)
+                {t('controls.preparingBtn')}
               </Button>
               <Button
                 size='sm'
@@ -311,10 +313,10 @@ export const ControlsPanel = ({ cp, deviceSettings }: ControlsPanelProps) => {
           <div className='space-y-2.5'>
             <div className='flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide'>
               <Power className='h-3.5 w-3.5' />
-              Transaction
+              {t('controls.transaction')}
             </div>
             <p className='text-[11px] text-muted-foreground leading-snug'>
-              Flujo: <strong>Preparing</strong> → <strong>StartTx</strong> (Charging) → <strong>StopTx</strong> (Finishing → Available). StartTx solo con el conector en Preparing.
+              <Trans i18nKey='controls.transactionHint' components={{ strong: <strong /> }} />
             </p>
             <div className='grid grid-cols-2 sm:grid-cols-3 gap-2'>
               <Button
@@ -358,7 +360,7 @@ export const ControlsPanel = ({ cp, deviceSettings }: ControlsPanelProps) => {
           <div className='space-y-2.5'>
             <div className='flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide'>
               <Lock className='h-3.5 w-3.5' />
-              Connector Control
+              {t('controls.connectorControl')}
             </div>
             <div className='grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-md'>
               <Button
@@ -368,7 +370,7 @@ export const ControlsPanel = ({ cp, deviceSettings }: ControlsPanelProps) => {
                 disabled={!connected}
                 className='h-9 text-xs sm:text-sm'
               >
-                Unlock Cable
+                {t('controls.unlockCable')}
               </Button>
             </div>
           </div>

@@ -23,6 +23,7 @@ import {
   X
 } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 interface OcppConfigurationFormProps {
   ocppConfig: OcppConfiguration;
@@ -35,6 +36,7 @@ export function OcppConfigurationForm({
   onSave,
   onCancel,
 }: OcppConfigurationFormProps) {
+  const { t } = useTranslation();
   const form = useForm<OcppConfiguration>({
     defaultValues: ocppConfig,
   });
@@ -68,9 +70,9 @@ export function OcppConfigurationForm({
               <Wifi className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <CardTitle>Connection & Heartbeat</CardTitle>
+              <CardTitle>{t('ocppConfig.connectionTitle')}</CardTitle>
               <CardDescription>
-                Configure connection timing and heartbeat settings
+                {t('ocppConfig.connectionDesc')}
               </CardDescription>
             </div>
           </div>
@@ -79,7 +81,7 @@ export function OcppConfigurationForm({
           <div className='grid grid-cols-3 gap-4'>
             <div className='space-y-2'>
               <label className='text-sm font-medium'>
-                Heartbeat Interval (s)
+                {t('ocppConfig.heartbeatInterval')}
               </label>
               <Input
                 type='number'
@@ -95,7 +97,7 @@ export function OcppConfigurationForm({
             </div>
             <div className='space-y-2'>
               <label className='text-sm font-medium'>
-                Connection Timeout (s)
+                {t('ocppConfig.connectionTimeout')}
               </label>
               <Input
                 type='number'
@@ -111,7 +113,7 @@ export function OcppConfigurationForm({
             </div>
             <div className='space-y-2'>
               <label className='text-sm font-medium'>
-                Boot Notification Interval (s)
+                {t('ocppConfig.bootInterval')}
               </label>
               <Input
                 type='number'
@@ -136,9 +138,9 @@ export function OcppConfigurationForm({
               <Gauge className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <CardTitle>Meter Values</CardTitle>
+              <CardTitle>{t('ocppConfig.metersTitle')}</CardTitle>
               <CardDescription>
-                Configure meter value sampling and reporting
+                {t('ocppConfig.metersDesc')}
               </CardDescription>
             </div>
           </div>
@@ -146,7 +148,7 @@ export function OcppConfigurationForm({
         <CardContent className='space-y-4'>
           <div className='grid grid-cols-2 gap-4'>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>Sample Interval (s)</label>
+              <label className='text-sm font-medium'>{t('ocppConfig.sampleInterval')}</label>
               <Input
                 type='number'
                 min='5'
@@ -161,7 +163,7 @@ export function OcppConfigurationForm({
             </div>
             <div className='space-y-2'>
               <label className='text-sm font-medium'>
-                Clock Aligned Interval (s)
+                {t('ocppConfig.clockAlignedInterval')}
               </label>
               <Input
                 type='number'
@@ -178,24 +180,24 @@ export function OcppConfigurationForm({
           </div>
 
           <div className='space-y-2'>
-            <label className='text-sm font-medium'>Sampled Data Types</label>
+            <label className='text-sm font-medium'>{t('ocppConfig.sampledData')}</label>
             <Input
               {...form.register('MeterValuesSampledData', { required: true })}
               placeholder='Energy.Active.Import.Register,Voltage,Current'
             />
             <p className='text-xs text-muted-foreground'>
-              Comma-separated list of measurands to sample
+              {t('ocppConfig.sampledDataHint')}
             </p>
           </div>
 
           <div className='space-y-2'>
-            <label className='text-sm font-medium'>Aligned Data Types</label>
+            <label className='text-sm font-medium'>{t('ocppConfig.alignedData')}</label>
             <Input
               {...form.register('MeterValuesAlignedData', { required: true })}
               placeholder='Energy.Active.Import.Register'
             />
             <p className='text-xs text-muted-foreground'>
-              Comma-separated list of measurands for clock-aligned data
+              {t('ocppConfig.alignedDataHint')}
             </p>
           </div>
         </CardContent>
@@ -208,9 +210,9 @@ export function OcppConfigurationForm({
               <CreditCard className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <CardTitle>Transaction Settings</CardTitle>
+              <CardTitle>{t('ocppConfig.txTitle')}</CardTitle>
               <CardDescription>
-                Configure transaction behavior and stop conditions
+                {t('ocppConfig.txDesc')}
               </CardDescription>
             </div>
           </div>
@@ -218,7 +220,7 @@ export function OcppConfigurationForm({
         <CardContent className='space-y-4'>
           <div className='grid grid-cols-3 gap-4'>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>Message Attempts</label>
+              <label className='text-sm font-medium'>{t('ocppConfig.messageAttempts')}</label>
               <Input
                 type='number'
                 min='1'
@@ -232,7 +234,7 @@ export function OcppConfigurationForm({
               />
             </div>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>Retry Interval (s)</label>
+              <label className='text-sm font-medium'>{t('ocppConfig.retryInterval')}</label>
               <Input
                 type='number'
                 min='1'
@@ -247,7 +249,7 @@ export function OcppConfigurationForm({
             </div>
             <div className='space-y-2'>
               <label className='text-sm font-medium'>
-                Max Energy on Invalid ID (Wh)
+                {t('ocppConfig.maxEnergyInvalid')}
               </label>
               <Input
                 type='number'
@@ -262,7 +264,7 @@ export function OcppConfigurationForm({
           </div>
 
           <div className='space-y-2'>
-            <label className='text-sm font-medium'>Stop Transaction Data</label>
+            <label className='text-sm font-medium'>{t('ocppConfig.stopTxData')}</label>
             <Input
               {...form.register('StopTxnSampledData', { required: true })}
               placeholder='Power.Active.Import,Voltage'
@@ -271,7 +273,7 @@ export function OcppConfigurationForm({
 
           <div className='space-y-2'>
             <label className='text-sm font-medium'>
-              Stop Transaction Aligned Data
+              {t('ocppConfig.stopTxAligned')}
             </label>
             <Input
               {...form.register('StopTxnAlignedData', { required: true })}
@@ -292,7 +294,7 @@ export function OcppConfigurationForm({
                 htmlFor='StopTransactionOnEVSideDisconnect'
                 className='text-sm font-medium'
               >
-                Stop on EV Disconnect
+                {t('ocppConfig.stopOnEvDisconnect')}
               </label>
             </div>
             <div className='flex items-center space-x-2'>
@@ -307,7 +309,7 @@ export function OcppConfigurationForm({
                 htmlFor='StopTransactionOnInvalidId'
                 className='text-sm font-medium'
               >
-                Stop on Invalid ID
+                {t('ocppConfig.stopOnInvalidId')}
               </label>
             </div>
           </div>
@@ -321,9 +323,9 @@ export function OcppConfigurationForm({
               <Shield className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <CardTitle>Authorization Settings</CardTitle>
+              <CardTitle>{t('ocppConfig.authTitle')}</CardTitle>
               <CardDescription>
-                Configure authorization and authentication behavior
+                {t('ocppConfig.authDesc')}
               </CardDescription>
             </div>
           </div>
@@ -342,7 +344,7 @@ export function OcppConfigurationForm({
                 htmlFor='AuthorizeRemoteTxRequests'
                 className='text-sm font-medium'
               >
-                Authorize Remote Transactions
+                {t('ocppConfig.authorizeRemote')}
               </label>
             </div>
             <div className='flex items-center space-x-2'>
@@ -357,7 +359,7 @@ export function OcppConfigurationForm({
                 htmlFor='LocalAuthorizeOffline'
                 className='text-sm font-medium'
               >
-                Local Authorize Offline
+                {t('ocppConfig.localAuthOffline')}
               </label>
             </div>
           </div>
@@ -375,7 +377,7 @@ export function OcppConfigurationForm({
                 htmlFor='LocalPreAuthorize'
                 className='text-sm font-medium'
               >
-                Local Pre-Authorize
+                {t('ocppConfig.localPreAuth')}
               </label>
             </div>
             <div className='flex items-center space-x-2'>
@@ -390,7 +392,7 @@ export function OcppConfigurationForm({
                 htmlFor='AuthorizationCacheEnabled'
                 className='text-sm font-medium'
               >
-                Authorization Cache
+                {t('ocppConfig.authCache')}
               </label>
             </div>
           </div>
@@ -407,7 +409,7 @@ export function OcppConfigurationForm({
               htmlFor='AllowOfflineTxForUnknownId'
               className='text-sm font-medium'
             >
-              Allow Offline Transactions for Unknown ID
+              {t('ocppConfig.allowOfflineUnknown')}
             </label>
           </div>
         </CardContent>
@@ -420,9 +422,9 @@ export function OcppConfigurationForm({
               <Settings className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <CardTitle>System Configuration</CardTitle>
+              <CardTitle>{t('ocppConfig.systemTitle')}</CardTitle>
               <CardDescription>
-                Configure system behavior and capabilities
+                {t('ocppConfig.systemDesc')}
               </CardDescription>
             </div>
           </div>
@@ -431,7 +433,7 @@ export function OcppConfigurationForm({
           <div className='grid grid-cols-3 gap-4'>
             <div className='space-y-2'>
               <label className='text-sm font-medium'>
-                Number of Connectors
+                {t('ocppConfig.numConnectors')}
               </label>
               <Input value='1' disabled />
               <input
@@ -444,7 +446,7 @@ export function OcppConfigurationForm({
             </div>
             <div className='space-y-2'>
               <label className='text-sm font-medium'>
-                Minimum Status Duration (s)
+                {t('ocppConfig.minStatusDuration')}
               </label>
               <Input
                 type='number'
@@ -459,7 +461,7 @@ export function OcppConfigurationForm({
               />
             </div>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>Get Config Max Keys</label>
+              <label className='text-sm font-medium'>{t('ocppConfig.getConfigMaxKeys')}</label>
               <Input
                 type='number'
                 min='10'
@@ -476,7 +478,7 @@ export function OcppConfigurationForm({
 
           <div className='space-y-2'>
             <label className='text-sm font-medium'>
-              Supported Feature Profiles
+              {t('ocppConfig.featureProfiles')}
             </label>
             <Input
               {...form.register('SupportedFeatureProfiles', { required: true })}
@@ -486,7 +488,7 @@ export function OcppConfigurationForm({
 
           <div className='space-y-2'>
             <label className='text-sm font-medium'>
-              Connector Phase Rotation
+              {t('ocppConfig.connectorPhaseRotation')}
             </label>
             <Input
               {...form.register('ConnectorPhaseRotation', { required: true })}
@@ -495,7 +497,7 @@ export function OcppConfigurationForm({
           </div>
 
           <div className='space-y-2'>
-            <label className='text-sm font-medium'>Firmware Version</label>
+            <label className='text-sm font-medium'>{t('ocppConfig.firmwareVersion')}</label>
             <Input
               {...form.register('FirmwareVersion', { required: true })}
               placeholder='1.0.0-web'
@@ -515,7 +517,7 @@ export function OcppConfigurationForm({
                 htmlFor='UnlockConnectorOnEVSideDisconnect'
                 className='text-sm font-medium'
               >
-                Unlock on EV Disconnect
+                {t('ocppConfig.unlockOnEvDisconnect')}
               </label>
             </div>
             <div className='flex items-center space-x-2'>
@@ -530,7 +532,7 @@ export function OcppConfigurationForm({
                 htmlFor='ChargeProfileEnabled'
                 className='text-sm font-medium'
               >
-                Charge Profile Support
+                {t('ocppConfig.chargeProfile')}
               </label>
             </div>
             <div className='flex items-center space-x-2'>
@@ -545,7 +547,7 @@ export function OcppConfigurationForm({
                 htmlFor='ReservationEnabled'
                 className='text-sm font-medium'
               >
-                Reservation Support
+                {t('ocppConfig.reservation')}
               </label>
             </div>
           </div>
@@ -559,15 +561,15 @@ export function OcppConfigurationForm({
               <Monitor className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <CardTitle>Display & LED Settings</CardTitle>
-              <CardDescription>Configure display and LED behavior</CardDescription>
+              <CardTitle>{t('ocppConfig.displayTitle')}</CardTitle>
+              <CardDescription>{t('ocppConfig.displayDesc')}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className='space-y-4'>
           <div className='grid grid-cols-2 gap-4'>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>Blink Repeat Count</label>
+              <label className='text-sm font-medium'>{t('ocppConfig.blinkRepeat')}</label>
               <Input
                 type='number'
                 min='1'
@@ -581,7 +583,7 @@ export function OcppConfigurationForm({
               />
             </div>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>Light Intensity (%)</label>
+              <label className='text-sm font-medium'>{t('ocppConfig.lightIntensity')}</label>
               <Input
                 type='number'
                 min='0'
@@ -605,9 +607,9 @@ export function OcppConfigurationForm({
               <Plug className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <CardTitle>Connector Availability & ID Tags</CardTitle>
+              <CardTitle>{t('ocppConfig.availabilityTitle')}</CardTitle>
               <CardDescription>
-                Configure connector availability and authorized ID tags
+                {t('ocppConfig.availabilityDesc')}
               </CardDescription>
             </div>
           </div>
@@ -615,10 +617,10 @@ export function OcppConfigurationForm({
         <CardContent className='space-y-4'>
           <div className='space-y-2'>
             <label className='text-sm font-medium'>
-              Connector Availability
+              {t('ocppConfig.connectorAvailability')}
             </label>
             <div className='flex items-center space-x-2'>
-              <span className='text-sm'>Connector 1:</span>
+              <span className='text-sm'>{t('ocppConfig.connectorN', { id: 1 })}</span>
               <Input
                 {...form.register('Availability.0')}
                 placeholder='Operative'
@@ -629,7 +631,7 @@ export function OcppConfigurationForm({
 
           <div className='space-y-2'>
             <div className='flex items-center justify-between'>
-              <label className='text-sm font-medium'>Authorized ID Tags</label>
+              <label className='text-sm font-medium'>{t('ocppConfig.authorizedTags')}</label>
               <Button
                 type='button'
                 variant='outline'
@@ -638,7 +640,7 @@ export function OcppConfigurationForm({
                 className="gap-2"
               >
                 <Plus className="h-3.5 w-3.5" />
-                Add Tag
+                {t('ocppConfig.addTag')}
               </Button>
             </div>
             <div className="space-y-2">
@@ -657,13 +659,13 @@ export function OcppConfigurationForm({
                     className="gap-2"
                   >
                     <X className="h-3.5 w-3.5" />
-                    Remove
+                    {t('common.remove')}
                   </Button>
                 </div>
               ))}
               {whitelistFields.length === 0 && (
                 <p className="text-xs text-muted-foreground py-2">
-                  No authorized ID tags. Click "Add Tag" to add one.
+                  {t('ocppConfig.noTags', { action: t('ocppConfig.addTag') })}
                 </p>
               )}
             </div>
@@ -687,10 +689,10 @@ export function OcppConfigurationForm({
       <Separator />
       <div className='flex justify-end gap-3 pt-4'>
         <Button type='button' variant='outline' onClick={onCancel}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button type='submit' className="min-w-[180px]">
-          Save OCPP Configuration
+          {t('ocppConfig.save')}
         </Button>
       </div>
     </form>

@@ -1,32 +1,33 @@
+import i18n from '@/i18n';
 import { toast } from 'sonner';
 
 export const showToast = {
   success: (message: string, title?: string) => {
-    toast.success(title || 'Success', {
+    toast.success(title || i18n.t('toast.success'), {
       description: message,
     });
   },
   
   error: (message: string, title?: string) => {
-    toast.error(title || 'Error', {
+    toast.error(title || i18n.t('toast.error'), {
       description: message,
     });
   },
   
   info: (message: string, title?: string) => {
-    toast.info(title || 'Info', {
+    toast.info(title || i18n.t('toast.info'), {
       description: message,
     });
   },
   
   warning: (message: string, title?: string) => {
-    toast.warning(title || 'Warning', {
+    toast.warning(title || i18n.t('toast.warning'), {
       description: message,
     });
   },
   
   loading: (message: string, title?: string) => {
-    return toast.loading(title || 'Loading', {
+    return toast.loading(title || i18n.t('toast.loading'), {
       description: message,
     });
   },

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Nextocode OCPP Simulator">
+  <defs>
+    <linearGradient id="ocpp-bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#00f0ba"/>
+      <stop offset="1" stop-color="#16009b"/>
+    </linearGradient>
+  </defs>
+  <!-- Chamfered tile echoing the Nextocode mark -->
+  <path fill="url(#ocpp-bg)" d="M18 0h40a6 6 0 0 1 6 6v40L46 64H6a6 6 0 0 1-6-6V18Z"/>
+  <!-- Bolt -->
+  <path fill="#ffffff" d="M37 9 17 36h12l-4 19 22-28H34.5L37 9Z"/>
+</svg>

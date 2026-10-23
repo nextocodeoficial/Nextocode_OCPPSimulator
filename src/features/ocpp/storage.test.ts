@@ -1,29 +1,28 @@
 import { describe, expect, it } from 'vitest'
-import reducer, { importFromBackend } from './ocppSlice'
+import reducer, { addChargePoint } from './ocppSlice'
 import { loadOcppState, saveOcppState } from './storage'
 
 describe('ocpp storage', () => {
-  it('round-trips the backend origin of imported chargers', () => {
-    const state = reducer(
-      undefined,
-      importFromBackend(
-        { id: 'cp-1', organizationId: 'o1', zoneId: 'z1', name: 'N', evseId: 'SIM-001', status: 'OFFLINE', connectors: [] },
-        { id: 'o1', name: 'Acme' },
-        { id: 'z1', name: 'Zone' }
-      )
-    )
-    saveOcppState(state)
+  it('round-trips every charger and resets connection status on load', () => {
+    let state = reducer(undefined, addChargePoint({ label: 'A' }))
+    state = reducer(state, addChargePoint({ label: 'B' }))
+    const connected = { ...state, items: { ...state.items } }
+    for (const id of connected.order) connected.items[id] = { ...connected.items[id], status: 'connected' }
+    saveOcppState(connected)
+
     const loaded = loadOcppState()!
-    const cp = Object.values(loaded.items)[0]
-    expect(cp.backend).toEqual(Object.values(state.items)[0].backend)
-    expect(cp.status).toBe('disconnected')
+    expect(loaded.order).toEqual(state.order)
+    expect(Object.values(loaded.items).map((cp) => cp.label).sort()).toEqual(['A', 'B'])
+    expect(Object.values(loaded.items).every((cp) => cp.status === 'disconnected')).toBe(true)
   })
 
-  it('treats legacy items without backend as local', () => {
+  it('ignores legacy fields from removed integrations', () => {
     saveOcppState({
-      items: { a: { id: 'a', label: 'Old', config: { csmsUrl: 'ws://x', cpId: 'a', protocol: 'ocpp1.6' }, status: 'connected', paused: false, runtime: { connectors: [] } } },
+      items: { a: { id: 'a', label: 'Old', config: { csmsUrl: 'ws://x', cpId: 'a', protocol: 'ocpp1.6' }, status: 'connected', paused: false, runtime: { connectors: [] }, backend: { organizationId: 'o1' } } },
       order: ['a'],
     })
-    expect(loadOcppState()!.items.a.backend).toBeUndefined()
+    const item = loadOcppState()!.items.a
+    expect(item.label).toBe('Old')
+    expect(item.backend).toBeUndefined()
   })
 })

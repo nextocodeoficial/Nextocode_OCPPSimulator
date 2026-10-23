@@ -6,8 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        VITE_BACKEND_API_URL: ${VITE_BACKEND_API_URL:-http://localhost:3001}
-        VITE_OCPP_GATEWAY_URL: ${VITE_OCPP_GATEWAY_URL:-ws://localhost:8887}
+        VITE_DEFAULT_CSMS_URL: ${VITE_DEFAULT_CSMS_URL:-}
     container_name: ocpp-simulate
     ports:
       - "3000:80"

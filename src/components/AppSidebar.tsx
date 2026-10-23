@@ -1,9 +1,12 @@
-// @ts-nocheck
+import { LogoMark } from '@/components/brand/Logo';
 import { ChargePointSheet } from '@/components/ocpp/ChargePointSheet';
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupAction,
+  SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
@@ -12,59 +15,38 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar';
 import { getEffectiveDeviceSettings } from '@/features/ocpp/effectiveConfig';
-import { groupChargePointsByOrganization, LOCAL_GROUP } from '@/features/ocpp/selectors';
+import type { ConnectionStatus } from '@/features/ocpp/ocppSlice';
+import { cn } from '@/lib/utils';
 import type { RootState } from '@/store/store';
-import { Plus, Zap, Battery, Clock } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { LayoutDashboard, Plus } from 'lucide-react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Button } from './ui/button';
 
-type NavItem = {
-  title: string;
-  url: string;
-  icon: any;
-  items?: { title: string; url: string }[];
-};
-const data: {
-  company: { name: string; logo: string; plan: string };
-  navMain: NavItem[];
-} = {
-  company: {
-    name: 'EV Station',
-    logo: '⚡',
-    plan: 'Enterprise',
-  },
-  navMain: [],
+const statusDot: Record<ConnectionStatus, string> = {
+  connected: 'bg-emerald-500 shadow-[0_0_0_3px] shadow-emerald-500/20',
+  connecting: 'bg-amber-400 animate-pulse',
+  disconnected: 'bg-muted-foreground/40',
 };
 
 export function AppSidebar() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const [cpSheetOpen, setCpSheetOpen] = useState(false);
   const { items, order } = useSelector((s: RootState) => s.ocpp);
-  const groups = useMemo(() => groupChargePointsByOrganization(items, order), [items, order]);
-
-  const isActive = (url: string) => {
-    if (url === '/dashboard') {
-      return location.pathname === '/dashboard';
-    }
-    return location.pathname.startsWith(url);
-  };
 
   return (
     <Sidebar collapsible='icon'>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              size='lg'
-              className='group data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
-              tooltip='OCPP Simulator'
-            >
-              <div className='w-full flex items-center gap-2'>
-                <Zap className='h-6 w-6' />
-                <span className='text-2xl font-bold group-data-[state=collapsed]:hidden'>OCPP Simulator</span>
+            <SidebarMenuButton size='lg' tooltip={t('app.name')} onClick={() => navigate('/')} className='cursor-pointer'>
+              <LogoMark className='size-8' />
+              <div className='grid flex-1 text-left leading-tight'>
+                <span className='truncate font-semibold tracking-tight'>{t('app.name')}</span>
+                <span className='truncate text-xs text-muted-foreground'>{t('app.by')}</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -72,62 +54,68 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <div className='flex items-center justify-between px-2'>
-          <SidebarGroupLabel>Connections</SidebarGroupLabel>
-          <Button
-            size='sm'
-            variant='ghost'
-            onClick={() => setCpSheetOpen(true)}
-            title='Add'
-          >
-            <Plus className='w-4 h-4' />
-          </Button>
-        </div>
-        {groups.map((group) => (
-          <div key={group.key}>
-            {groups.length > 1 || group.key !== LOCAL_GROUP ? (
-              <SidebarGroupLabel className='group-data-[state=collapsed]:hidden'>{group.name}</SidebarGroupLabel>
-            ) : null}
-            <SidebarMenu>
-          {group.ids.map((id) => (
-            <SidebarMenuItem key={id}>
+        <SidebarGroup>
+          <SidebarMenu>
+            <SidebarMenuItem>
               <SidebarMenuButton
-                className='group cursor-pointer'
-                onClick={() => navigate(`/cp/${id}`)}
-                tooltip={
-                  items[id]
-                    ? `${items[id].label} · ${getEffectiveDeviceSettings(items[id], id).deviceName}`
-                    : id
-                }
+                isActive={location.pathname === '/'}
+                tooltip={t('nav.dashboard')}
+                onClick={() => navigate('/')}
+                className='cursor-pointer'
               >
-                <span className='inline-flex items-center gap-2'>
-                  {items[id]?.status === 'connected' ? (
-                    <Zap className='h-4 w-4 text-green-500' />
-                  ) : items[id]?.status === 'connecting' ? (
-                    <Clock className='h-4 w-4 text-yellow-500' />
-                  ) : (
-                    <Battery className='h-4 w-4 text-slate-400' />
-                  )}
-                  <span className='group-data-[state=collapsed]:hidden'>{items[id]?.label || id}</span>
-                </span>
+                <LayoutDashboard />
+                <span>{t('nav.dashboard')}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
-          ))}
+          </SidebarMenu>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>{t('nav.chargePoints')}</SidebarGroupLabel>
+          <SidebarGroupAction title={t('nav.add')} aria-label={t('nav.add')} onClick={() => setCpSheetOpen(true)}>
+            <Plus />
+          </SidebarGroupAction>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {order.length === 0 && (
+                <p className='px-2 py-1.5 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden'>
+                  {t('nav.empty')}
+                </p>
+              )}
+              {order.map((id) => {
+                const cp = items[id];
+                if (!cp) return null;
+                return (
+                  <SidebarMenuItem key={id}>
+                    <SidebarMenuButton
+                      isActive={location.pathname === `/cp/${id}`}
+                      className='cursor-pointer'
+                      onClick={() => navigate(`/cp/${id}`)}
+                      tooltip={`${cp.label} · ${getEffectiveDeviceSettings(cp, id).deviceName} · ${t(`status.${cp.status}`)}`}
+                    >
+                      <span className='flex size-4 items-center justify-center'>
+                        <span className={cn('size-2 rounded-full', statusDot[cp.status])} />
+                      </span>
+                      <span className='truncate'>{cp.label || id}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
-          </div>
-        ))}
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              tooltip='New Connection'
-              className='group cursor-pointer flex items-center gap-2'
+              tooltip={t('nav.newChargePoint')}
+              className='cursor-pointer bg-gradient-to-r from-[#00f0ba] to-[#16009b] font-medium text-white hover:text-white hover:opacity-90 active:text-white'
               onClick={() => setCpSheetOpen(true)}
             >
-              <Plus className='w-4 h-4' />
-              <span className='group-data-[state=collapsed]:hidden'>New Connection</span>
+              <Plus />
+              <span>{t('nav.newChargePoint')}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

@@ -4,18 +4,11 @@ import { render } from '@testing-library/react'
 import type { ReactElement } from 'react'
 import { Provider } from 'react-redux'
 import { MemoryRouter } from 'react-router-dom'
-import authReducer, { type AuthState } from '@/features/backend/authSlice'
-import { bindStoreToApi } from '@/features/backend/session'
 import ocppReducer from '@/features/ocpp/ocppSlice'
+import '@/i18n'
 
-export function renderWithProviders(ui: ReactElement, opts: { auth?: Partial<AuthState> } = {}) {
-  const store = configureStore({
-    reducer: { ocpp: ocppReducer, backendAuth: authReducer },
-    preloadedState: opts.auth
-      ? { backendAuth: { isSuperAdmin: false, ...opts.auth } as AuthState }
-      : undefined,
-  })
-  bindStoreToApi(store)
+export function renderWithProviders(ui: ReactElement) {
+  const store = configureStore({ reducer: { ocpp: ocppReducer } })
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const result = render(
     <Provider store={store}>

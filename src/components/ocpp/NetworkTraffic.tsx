@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/table';
 import type { NetworkTrafficFilter, OCPPFrame } from '@/types/ocpp';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface NetworkTrafficProps {
   frames: OCPPFrame[];
@@ -59,6 +60,7 @@ export const NetworkTraffic = ({
   onCopy,
   onClear,
 }: NetworkTrafficProps) => {
+  const { t } = useTranslation();
   const [filter, setFilter] = useState<NetworkTrafficFilter>({
     dir: 'all',
     kind: 'all',
@@ -98,7 +100,7 @@ export const NetworkTraffic = ({
               active={filter.dir === 'all' && filter.kind === 'all'}
               onClick={() => setFilter({ dir: 'all', kind: 'all', q: '' })}
             >
-              All
+              {t('common.all')}
             </ToggleBtn>
             <ToggleBtn
               active={filter.dir === 'out'}
@@ -134,7 +136,7 @@ export const NetworkTraffic = ({
           </div>
           <div className='flex flex-wrap items-center gap-2'>
             <Input
-              placeholder='Search'
+              placeholder={t('common.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className='w-full h-8 sm:w-40'
@@ -145,7 +147,7 @@ export const NetworkTraffic = ({
               onClick={onTogglePause}
               className='h-8 flex-1 sm:flex-initial'
             >
-              {paused ? 'Resume' : 'Pause'}
+              {paused ? t('common.resume') : t('common.pause')}
             </Button>
             <Button
               size='sm'
@@ -153,7 +155,7 @@ export const NetworkTraffic = ({
               onClick={onCopy}
               className='h-8 flex-1 sm:flex-initial'
             >
-              Copy
+              {t('common.copy')}
             </Button>
             <Button 
               size='sm' 
@@ -161,7 +163,7 @@ export const NetworkTraffic = ({
               onClick={onClear} 
               className='h-8 flex-1 sm:flex-initial'
             >
-              Clear
+              {t('common.clear')}
             </Button>
           </div>
         </div>
@@ -170,11 +172,11 @@ export const NetworkTraffic = ({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className='w-[80px] sm:w-[120px]'>Time</TableHead>
-                <TableHead className='w-[40px] sm:w-[60px]'>Dir</TableHead>
-                <TableHead className='w-[80px] sm:w-[120px]'>Type</TableHead>
-                <TableHead className='min-w-[100px]'>Action</TableHead>
-                <TableHead className='w-[120px] sm:w-[220px]'>Id</TableHead>
+                <TableHead className='w-[80px] sm:w-[120px]'>{t('traffic.time')}</TableHead>
+                <TableHead className='w-[40px] sm:w-[60px]'>{t('traffic.dir')}</TableHead>
+                <TableHead className='w-[80px] sm:w-[120px]'>{t('traffic.type')}</TableHead>
+                <TableHead className='min-w-[100px]'>{t('traffic.action')}</TableHead>
+                <TableHead className='w-[120px] sm:w-[220px]'>{t('traffic.id')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

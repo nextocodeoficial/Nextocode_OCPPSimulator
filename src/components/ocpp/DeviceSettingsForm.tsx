@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 
 interface DeviceSettingsFormProps {
   deviceSettings: DeviceSettings;
@@ -50,6 +51,7 @@ export function DeviceSettingsForm({
   onSave,
   onCancel,
 }: DeviceSettingsFormProps) {
+  const { t } = useTranslation();
   const form = useForm<DeviceSettings>({
     defaultValues: deviceSettings,
   });
@@ -81,22 +83,22 @@ export function DeviceSettingsForm({
               <Info className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <CardTitle>Basic Device Information</CardTitle>
-              <CardDescription>Configure basic device properties</CardDescription>
+              <CardTitle>{t('deviceSettings.basicTitle')}</CardTitle>
+              <CardDescription>{t('deviceSettings.basicDesc')}</CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className='space-y-4'>
           <div className='grid grid-cols-2 gap-4'>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>Device Name</label>
+              <label className='text-sm font-medium'>{t('deviceSettings.deviceName')}</label>
               <Input
                 {...form.register('deviceName', { required: true })}
                 placeholder='Simulator-01'
               />
             </div>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>Model</label>
+              <label className='text-sm font-medium'>{t('deviceSettings.model')}</label>
               <Input
                 {...form.register('model', { required: true })}
                 placeholder='EVSE-Sim v1'
@@ -106,7 +108,7 @@ export function DeviceSettingsForm({
 
           <div className='grid grid-cols-2 gap-4'>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>AC/DC Type</label>
+              <label className='text-sm font-medium'>{t('deviceSettings.acdcType')}</label>
               <Select
                 value={form.watch('acdc')}
                 onValueChange={(value) =>
@@ -126,7 +128,7 @@ export function DeviceSettingsForm({
               </Select>
             </div>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>Connector Count</label>
+              <label className='text-sm font-medium'>{t('deviceSettings.connectorCount')}</label>
               <Input
                 type='number'
                 min='1'
@@ -146,9 +148,9 @@ export function DeviceSettingsForm({
               <Gauge className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <CardTitle>Electrical Specifications</CardTitle>
+              <CardTitle>{t('deviceSettings.electricalTitle')}</CardTitle>
               <CardDescription>
-                Configure power and electrical parameters
+                {t('deviceSettings.electricalDesc')}
               </CardDescription>
             </div>
           </div>
@@ -156,7 +158,7 @@ export function DeviceSettingsForm({
         <CardContent className='space-y-4'>
           <div className='grid grid-cols-3 gap-4'>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>Max Power (kW)</label>
+              <label className='text-sm font-medium'>{t('deviceSettings.maxPower')}</label>
               <Input
                 type='number'
                 step='0.1'
@@ -169,7 +171,7 @@ export function DeviceSettingsForm({
               />
             </div>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>Nominal Voltage (V)</label>
+              <label className='text-sm font-medium'>{t('deviceSettings.nominalVoltage')}</label>
               <Input
                 type='number'
                 min='0'
@@ -181,7 +183,7 @@ export function DeviceSettingsForm({
               />
             </div>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>Max Current (A)</label>
+              <label className='text-sm font-medium'>{t('deviceSettings.maxCurrent')}</label>
               <Input
                 type='number'
                 step='0.1'
@@ -197,7 +199,7 @@ export function DeviceSettingsForm({
 
           <div className='grid grid-cols-2 gap-4'>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>Energy (kWh)</label>
+              <label className='text-sm font-medium'>{t('deviceSettings.energy')}</label>
               <Input
                 type='number'
                 step='0.001'
@@ -210,7 +212,7 @@ export function DeviceSettingsForm({
               />
             </div>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>Phase Rotation</label>
+              <label className='text-sm font-medium'>{t('deviceSettings.phaseRotation')}</label>
               <Select
                 value={form.watch('phaseRotation')}
                 onValueChange={(value) => form.setValue('phaseRotation', value)}
@@ -231,7 +233,7 @@ export function DeviceSettingsForm({
 
           <div className='grid grid-cols-2 gap-4'>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>Battery Start (%)</label>
+              <label className='text-sm font-medium'>{t('deviceSettings.batteryStart')}</label>
               <Input
                 type='number'
                 min='0'
@@ -245,8 +247,8 @@ export function DeviceSettingsForm({
               />
               <p className='text-xs text-muted-foreground'>
                 {acdc === 'DC'
-                  ? 'Controls the starting state-of-charge for DC charging simulations.'
-                  : 'Uses this value as the initial SoC reported in meter values.'}
+                  ? t('deviceSettings.batteryStartDc')
+                  : t('deviceSettings.batteryStartAc')}
               </p>
             </div>
           </div>
@@ -260,9 +262,9 @@ export function DeviceSettingsForm({
               <Plug className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <CardTitle>Connector Configuration</CardTitle>
+              <CardTitle>{t('deviceSettings.connectorTitle')}</CardTitle>
               <CardDescription>
-                Configure individual connector settings
+                {t('deviceSettings.connectorDesc')}
               </CardDescription>
             </div>
           </div>
@@ -270,7 +272,7 @@ export function DeviceSettingsForm({
         <CardContent className='space-y-4'>
           <div className='grid grid-cols-3 gap-4 items-center'>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>Connector Type</label>
+              <label className='text-sm font-medium'>{t('deviceSettings.connectorType')}</label>
               <Select
                 value={form.watch('socketType.0')}
                 onValueChange={(value) => form.setValue('socketType.0', value)}
@@ -296,11 +298,11 @@ export function DeviceSettingsForm({
                 }
               />
               <label htmlFor='cableLock' className='text-sm font-medium'>
-                Cable Lock
+                {t('deviceSettings.cableLock')}
               </label>
             </div>
             <div className='text-sm text-muted-foreground'>
-              Single connector configuration is fixed for this simulator.
+              {t('deviceSettings.singleConnectorNote')}
             </div>
           </div>
         </CardContent>
@@ -313,9 +315,9 @@ export function DeviceSettingsForm({
               <Settings className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <CardTitle>Features & Settings</CardTitle>
+              <CardTitle>{t('deviceSettings.featuresTitle')}</CardTitle>
               <CardDescription>
-                Configure additional device features
+                {t('deviceSettings.featuresDesc')}
               </CardDescription>
             </div>
           </div>
@@ -331,7 +333,7 @@ export function DeviceSettingsForm({
                 }
               />
               <label htmlFor='hasRfid' className='text-sm font-medium'>
-                RFID Reader
+                {t('deviceSettings.rfidReader')}
               </label>
             </div>
             <div className='flex items-center space-x-2'>
@@ -343,21 +345,21 @@ export function DeviceSettingsForm({
                 }
               />
               <label htmlFor='hasDisplay' className='text-sm font-medium'>
-                Display
+                {t('deviceSettings.display')}
               </label>
             </div>
           </div>
 
           <div className='grid grid-cols-2 gap-4'>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>Timezone</label>
+              <label className='text-sm font-medium'>{t('deviceSettings.timezone')}</label>
               <Input
                 {...form.register('timezone', { required: true })}
                 placeholder='Europe/Istanbul'
               />
             </div>
             <div className='space-y-2'>
-              <label className='text-sm font-medium'>Price per kWh</label>
+              <label className='text-sm font-medium'>{t('deviceSettings.pricePerKwh')}</label>
               <Input
                 type='number'
                 step='0.01'
@@ -376,10 +378,10 @@ export function DeviceSettingsForm({
       <Separator />
       <div className='flex justify-end gap-3 pt-4'>
         <Button type='button' variant='outline' onClick={onCancel}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button type='submit' className="min-w-[140px]">
-          Save Device Settings
+          {t('deviceSettings.save')}
         </Button>
       </div>
     </form>
